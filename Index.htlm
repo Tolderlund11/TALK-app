@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html lang="da">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>TALK</title>
+
+  <style>
+
+    * { box-sizing: border-box; }
+
+    body {
+
+      margin: 0;
+
+      font-family: Arial, sans-serif;
+
+      background: #f2f4f7;
+
+      color: #18202a;
+
+    }
+
+    header {
+
+      background: #123d63;
+
+      color: white;
+
+      padding: 22px;
+
+      text-align: center;
+
+    }
+
+    header h1 { margin: 0; font-size: 30px; }
+
+    header p { margin: 5px 0 0; opacity: .8; }
+
+    main { max-width: 600px; margin: auto; padding: 18px; }
+
+    .card {
+
+      background: white;
+
+      border-radius: 16px;
+
+      padding: 18px;
+
+      margin-bottom: 15px;
+
+      box-shadow: 0 3px 12px #00000012;
+
+    }
+
+    h2 { margin-top: 0; }
+
+    input, select, textarea, button {
+
+      width: 100%;
+
+      padding: 13px;
+
+      margin-top: 10px;
+
+      border-radius: 10px;
+
+      border: 1px solid #ccd3da;
+
+      font-size: 16px;
+
+    }
+
+    button {
+
+      background: #ffb000;
+
+      border: 0;
+
+      font-weight: bold;
+
+      cursor: pointer;
+
+    }
+
+    .message {
+
+      background: #e8f0f7;
+
+      border-radius: 12px;
+
+      padding: 11px;
+
+      margin-top: 9px;
+
+    }
+
+    .message b { color: #123d63; }
+
+    .hidden { display: none; }
+
+    .logout { background: #dce3e8; }
+
+  </style>
+
+</head>
+
+<body>
+
+  <header>
+
+    <h1>TALK</h1>
+
+    <p>Sammen på jobbet</p>
+
+  </header>
+
+  <main>
+
+    <section id="login" class="card">
+
+      <h2>Log ind</h2>
+
+      <input id="name" placeholder="Dit navn">
+
+      <input id="pin" type="password" inputmode="numeric" placeholder="PIN-kode">
+
+      <button onclick="login()">Log ind</button>
+
+    </section>
+
+    <section id="app" class="hidden">
+
+      <div class="card">
+
+        <h2 id="welcome"></h2>
+
+        <label>Vælg byggeplads</label>
+
+        <select id="site">
+
+          <option>Kolding</option>
+
+          <option>Vejle</option>
+
+          <option>Kontoret</option>
+
+        </select>
+
+      </div>
+
+      <div class="card">
+
+        <h2>Fælles chat</h2>
+
+        <div id="messages"></div>
+
+        <textarea id="text" placeholder="Skriv en besked…"></textarea>
+
+        <button onclick="sendMessage()">Send besked</button>
+
+      </div>
+
+      <div class="card">
+
+        <h2>Opslag</h2>
+
+        <p><b>Velkommen til TALK 👋</b></p>
+
+        <p>Her kan medarbejderne skrive sammen og følge med i beskeder fra arbejdspladsen.</p>
+
+      </div>
+
+      <button class="logout" onclick="logout()">Log ud</button>
+
+    </section>
+
+  </main>
+
+  <script>
+
+    let user = localStorage.getItem("talkUser") || "";
+
+    let messages = JSON.parse(localStorage.getItem("talkMessages") || "[]");
+
+    function login() {
+
+      const name = document.getElementById("name").value.trim();
+
+      const pin = document.getElementById("pin").value.trim();
+
+      if (!name || pin.length < 4) {
+
+        alert("Skriv dit navn og en PIN-kode på mindst 4 tal.");
+
+        return;
+
+      }
+
+      user = name;
+
+      localStorage.setItem("talkUser", user);
+
+      showApp();
+
+    }
+
+    function showApp() {
+
+      document.getElementById("login").classList.add("hidden");
+
+      document.getElementById("app").classList.remove("hidden");
+
+      document.getElementById("welcome").textContent = "Hej " + user;
+
+      renderMessages();
+
+    }
+
+    function sendMessage() {
+
+      const text = document.getElementById("text").value.trim();
+
+      if (!text) return;
+
+      messages.push({
+
+        name: user,
+
+        text: text,
+
+        time: new Date().toLocaleTimeString("da-DK", {
+
+          hour: "2-digit",
+
+          minute: "2-digit"
+
+        })
+
+      });
+
+      localStorage.setItem("talkMessages", JSON.stringify(messages));
+
+      document.getElementById("text").value = "";
+
+      renderMessages();
+
+    }
+
+    function renderMessages() {
+
+      const box = document.getElementById("messages");
+
+      if (!messages.length) {
+
+        box.innerHTML = "<p>Der er ingen beskeder endnu.</p>";
+
+        return;
+
+      }
+
+      box.innerHTML = messages.map(message =>
+
+        `<div class="message">
+
+          <b>${escapeHtml(message.name)}</b> · ${message.time}<br>
+
+          ${escapeHtml(message.text)}
+
+        </div>`
+
+      ).join("");
+
+    }
+
+    function escapeHtml(text) {
+
+      const div = document.createElement("div");
+
+      div.textContent = text;
+
+      return div.innerHTML;
+
+    }
+
+    function logout() {
+
+      localStorage.removeItem("talkUser");
+
+      location.reload();
+
+    }
+
+    if (user) showApp();
+
+  </script>
+
+</body>
+
+</html>
