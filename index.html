@@ -13,19 +13,29 @@
 
   <style>
 
-    body {
+    html,body,#talk {
 
-      margin: 0;
+      width:100%;
 
-      background: #0c1814;
+      height:100%;
 
-      color: white;
+      margin:0;
 
-      font-family: Arial, sans-serif;
+      border:0;
 
-      text-align: center;
+      background:#0c1814;
 
-      padding-top: 80px;
+    }
+
+    #status {
+
+      color:white;
+
+      font-family:Arial,sans-serif;
+
+      text-align:center;
+
+      padding-top:80px;
 
     }
 
@@ -35,35 +45,35 @@
 
 <body>
 
-  <h1>Starter TALK…</h1>
+  <div id="status"><h1>Starter TALK…</h1></div>
 
   <script>
 
     fetch("https://iuuvepbgrrtjjeiktipe.supabase.co/storage/v1/object/public/talk-public/index.html?v=" + Date.now())
 
-      .then(response => {
-
-        if (!response.ok) throw new Error("Kunne ikke hente TALK");
-
-        return response.text();
-
-      })
+      .then(response => response.text())
 
       .then(html => {
 
-        document.open();
+        document.body.innerHTML = "";
 
-        document.write(html);
+        const frame = document.createElement("iframe");
 
-        document.close();
+        frame.id = "talk";
+
+        frame.srcdoc = html;
+
+        frame.allow = "camera; microphone";
+
+        document.body.appendChild(frame);
 
       })
 
       .catch(() => {
 
-        document.body.innerHTML =
+        document.getElementById("status").innerHTML =
 
-          "<h1>TALK kunne ikke starte</h1><p>Prøv at genindlæse siden.</p>";
+          "<h1>TALK kunne ikke starte</h1><p>Prøv igen.</p>";
 
       });
 
