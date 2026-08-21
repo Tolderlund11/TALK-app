@@ -1,397 +1,73 @@
 
-<!DOCTYPE html>
+<!doctype html>
 
 <html lang="da">
 
 <head>
 
-<meta charset="UTF-8">
+  <meta charset="utf-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>TALK</title>
+  <title>TALK</title>
 
-<style>
+  <style>
 
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f2f5f7;color:#17212b}
+    body {
 
-header{background:#123d63;color:#fff;padding:20px;text-align:center}
+      margin: 0;
 
-header h1{margin:0;font-size:32px}header p{margin:4px 0 0;color:#cbd8e3}
+      background: #0c1814;
 
-main{max-width:650px;margin:auto;padding:15px}.card{background:#fff;border-radius:16px;padding:17px;margin-bottom:14px;box-shadow:0 3px 12px #0001}
+      color: white;
 
-h2,h3{margin-top:0}input,select,textarea,button{width:100%;padding:12px;margin-top:9px;border:1px solid #ccd4db;border-radius:10px;font-size:16px}
+      font-family: Arial, sans-serif;
 
-button{background:#ffb000;border:0;font-weight:bold;cursor:pointer}.secondary{background:#dfe6eb}.danger{background:#e45b5b;color:#fff}
+      text-align: center;
 
-.hidden{display:none!important}.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+      padding-top: 80px;
 
-.nav button{font-size:12px;padding:10px 3px;margin:0}.item{background:#edf2f6;border-radius:11px;padding:11px;margin-top:9px}
+    }
 
-.message{background:#e4edf5;border-radius:12px;padding:10px;margin-top:8px}.message b{color:#123d63}
-
-.row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.row button{width:auto}
-
-.badge{background:#ffb000;border-radius:20px;padding:3px 8px;font-size:12px}.small{font-size:13px;color:#687581}
-
-</style>
+  </style>
 
 </head>
 
 <body>
 
-<header><h1>TALK</h1><p>Sammen på jobbet</p></header>
+  <h1>Starter TALK…</h1>
 
-<main>
+  <script>
 
-<section id="login" class="card">
+    fetch("https://iuuvepbgrrtjjeiktipe.supabase.co/storage/v1/object/public/talk-public/index.html?v=" + Date.now())
 
-<h2>Log ind</h2>
+      .then(response => {
 
-<input id="loginName" placeholder="Dit navn">
+        if (!response.ok) throw new Error("Kunne ikke hente TALK");
 
-<input id="loginPin" type="password" inputmode="numeric" placeholder="PIN-kode">
+        return response.text();
 
-<button onclick="login()">Log ind</button>
+      })
 
-<p class="small">Administrator: Kenneth / PIN 1234</p>
+      .then(html => {
 
-</section>
+        document.open();
 
-<section id="app" class="hidden">
+        document.write(html);
 
-<div class="card row">
+        document.close();
 
-<div><b id="welcome"></b><br><span id="role" class="small"></span></div>
+      })
 
-<button class="secondary" onclick="logout()">Log ud</button>
+      .catch(() => {
 
-</div>
+        document.body.innerHTML =
 
-<div class="nav">
+          "<h1>TALK kunne ikke starte</h1><p>Prøv at genindlæse siden.</p>";
 
-<button onclick="showPage('chat')">Chat</button>
+      });
 
-<button onclick="showPage('news')">Opslag</button>
-
-<button onclick="showPage('sites')">Pladser</button>
-
-<button onclick="showPage('admin')">Kontor</button>
-
-</div>
-
-<section id="chat" class="page">
-
-<div class="card">
-
-<h2>Byggeplads-chat</h2>
-
-<select id="chatSite" onchange="renderMessages()"></select>
-
-<div id="messages"></div>
-
-<textarea id="messageText" placeholder="Skriv en besked…"></textarea>
-
-<button onclick="sendMessage()">Send besked</button>
-
-</div>
-
-</section>
-
-<section id="news" class="page hidden">
-
-<div class="card">
-
-<h2>Opslag</h2>
-
-<div id="announcements"></div>
-
-<div id="newAnnouncement" class="hidden">
-
-<textarea id="announcementText" placeholder="Skriv et nyt opslag…"></textarea>
-
-<button onclick="addAnnouncement()">Opret opslag</button>
-
-</div>
-
-</div>
-
-</section>
-
-<section id="sites" class="page hidden">
-
-<div class="card">
-
-<h2>Byggepladser</h2>
-
-<div id="siteList"></div>
-
-<div id="newSite" class="hidden">
-
-<input id="siteName" placeholder="Navn på ny byggeplads">
-
-<button onclick="addSite()">Opret byggeplads</button>
-
-</div>
-
-</div>
-
-</section>
-
-<section id="admin" class="page hidden">
-
-<div class="card">
-
-<h2>Kontoroversigt</h2>
-
-<div id="stats"></div>
-
-</div>
-
-<div class="card">
-
-<h2>Medarbejdere</h2>
-
-<div id="employeeList"></div>
-
-<div id="newEmployee" class="hidden">
-
-<input id="employeeName" placeholder="Medarbejderens navn">
-
-<input id="employeePin" inputmode="numeric" placeholder="PIN-kode">
-
-<select id="employeeSite"></select>
-
-<button onclick="addEmployee()">Opret medarbejder</button>
-
-</div>
-
-</div>
-
-</section>
-
-</section>
-
-</main>
-
-<script>
-
-const defaults={
-
-sites:["Kolding","Vejle","Kontoret"],
-
-employees:[
-
-{name:"Kenneth",pin:"1234",site:"Kontoret",admin:true},
-
-{name:"Lars",pin:"1111",site:"Kolding",admin:false}
-
-],
-
-messages:[],
-
-announcements:[{text:"Velkommen til TALK 👋",author:"Kontoret",seen:[]}]
-
-};
-
-let data=loadData(),user=null;
-
-function loadData(){
-
-try{
-
-const saved=JSON.parse(localStorage.getItem("talkData"));
-
-return saved&&saved.sites? saved:JSON.parse(JSON.stringify(defaults));
-
-}catch(e){return JSON.parse(JSON.stringify(defaults))}
-
-}
-
-function save(){localStorage.setItem("talkData",JSON.stringify(data))}
-
-function safe(t){const d=document.createElement("div");d.textContent=t;return d.innerHTML}
-
-function login(){
-
-const name=document.getElementById("loginName").value.trim().toLowerCase();
-
-const pin=document.getElementById("loginPin").value.trim();
-
-user=data.employees.find(e=>e.name.toLowerCase()===name&&e.pin===pin);
-
-if(!user){alert("Navn eller PIN-kode er forkert.");return}
-
-document.getElementById("login").classList.add("hidden");
-
-document.getElementById("app").classList.remove("hidden");
-
-document.getElementById("welcome").textContent="Hej "+user.name;
-
-document.getElementById("role").textContent=user.admin?"Administrator":user.site;
-
-document.getElementById("newSite").classList.toggle("hidden",!user.admin);
-
-document.getElementById("newEmployee").classList.toggle("hidden",!user.admin);
-
-document.getElementById("newAnnouncement").classList.toggle("hidden",!user.admin);
-
-refresh();
-
-}
-
-function logout(){location.reload()}
-
-function showPage(id){
-
-document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
-
-document.getElementById(id).classList.remove("hidden");refresh();
-
-}
-
-function refresh(){
-
-fillSites();renderSites();renderEmployees();renderMessages();renderAnnouncements();renderStats();
-
-}
-
-function fillSites(){
-
-const options=data.sites.map(s=>`<option>${safe(s)}</option>`).join("");
-
-const chat=document.getElementById("chatSite"),emp=document.getElementById("employeeSite");
-
-const old=chat.value;chat.innerHTML=options;emp.innerHTML=options;
-
-chat.value=data.sites.includes(old)?old:(user?.admin?data.sites[0]:user?.site);
-
-}
-
-function addSite(){
-
-const name=document.getElementById("siteName").value.trim();
-
-if(!name)return;
-
-if(data.sites.some(s=>s.toLowerCase()===name.toLowerCase())){alert("Byggepladsen findes allerede.");return}
-
-data.sites.push(name);document.getElementById("siteName").value="";save();refresh();
-
-}
-
-function renderSites(){
-
-document.getElementById("siteList").innerHTML=data.sites.map(s=>{
-
-const count=data.employees.filter(e=>e.site===s).length;
-
-return `<div class="item"><b>${safe(s)}</b><br><span class="small">${count} medarbejdere</span></div>`
-
-}).join("");
-
-}
-
-function addEmployee(){
-
-const name=document.getElementById("employeeName").value.trim();
-
-const pin=document.getElementById("employeePin").value.trim();
-
-const site=document.getElementById("employeeSite").value;
-
-if(!name||pin.length<4){alert("Skriv navn og en PIN-kode på mindst 4 tal.");return}
-
-data.employees.push({name,pin,site,admin:false});
-
-document.getElementById("employeeName").value="";
-
-document.getElementById("employeePin").value="";
-
-save();refresh();
-
-}
-
-function renderEmployees(){
-
-document.getElementById("employeeList").innerHTML=data.employees.map(e=>
-
-`<div class="item"><b>${safe(e.name)}</b> ${e.admin?'<span class="badge">Admin</span>':""}<br><span class="small">${safe(e.site)}</span></div>`
-
-).join("");
-
-}
-
-function sendMessage(){
-
-const text=document.getElementById("messageText").value.trim();
-
-const site=document.getElementById("chatSite").value;
-
-if(!text)return;
-
-data.messages.push({name:user.name,site,text,time:new Date().toLocaleTimeString("da-DK",{hour:"2-digit",minute:"2-digit"})});
-
-document.getElementById("messageText").value="";save();renderMessages();
-
-}
-
-function renderMessages(){
-
-const site=document.getElementById("chatSite").value;
-
-const list=data.messages.filter(m=>m.site===site);
-
-document.getElementById("messages").innerHTML=list.length?list.map(m=>
-
-`<div class="message"><b>${safe(m.name)}</b> · ${m.time}<br>${safe(m.text)}</div>`
-
-).join(""):"<p class='small'>Ingen beskeder endnu.</p>";
-
-}
-
-function addAnnouncement(){
-
-const text=document.getElementById("announcementText").value.trim();
-
-if(!text)return;
-
-data.announcements.unshift({text,author:user.name,seen:[user.name]});
-
-document.getElementById("announcementText").value="";save();renderAnnouncements();
-
-}
-
-function renderAnnouncements(){
-
-data.announcements.forEach(a=>{if(user&&!a.seen.includes(user.name))a.seen.push(user.name)});
-
-save();
-
-document.getElementById("announcements").innerHTML=data.announcements.map(a=>
-
-`<div class="item"><b>${safe(a.author)}</b><p>${safe(a.text)}</p><span class="small">Set af ${a.seen.length}</span></div>`
-
-).join("");
-
-}
-
-function renderStats(){
-
-document.getElementById("stats").innerHTML=
-
-`<div class="item">Byggepladser: <b>${data.sites.length}</b></div>
-
-<div class="item">Medarbejdere: <b>${data.employees.length}</b></div>
-
-<div class="item">Beskeder: <b>${data.messages.length}</b></div>
-
-<div class="item">Opslag: <b>${data.announcements.length}</b></div>`;
-
-}
-
-</script>
+  </script>
 
 </body>
 
