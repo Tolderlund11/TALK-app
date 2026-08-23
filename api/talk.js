@@ -1,12 +1,31 @@
+export default async function handler(req, res) {
 
-export default function handler(req, res) {
+  try {
 
-  res.status(200).json({
+    const response = await fetch(
 
-    ok: true,
+      "https://iuuvepbgrrtjjeiktipe.supabase.co/storage/v1/object/public/talk-public/index.html"
 
-    message: "TALK API virker"
-      
-});
+    );
+
+    if (!response.ok) {
+
+      throw new Error("Kunne ikke hente TALK fra Supabase");
+
+    }
+
+    const html = await response.text();
+
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+
+    res.setHeader("Cache-Control", "no-store");
+
+    res.status(200).send(html);
+
+  } catch (error) {
+
+    res.status(500).send("TALK kunne ikke starte");
+
+  }
 
 }
