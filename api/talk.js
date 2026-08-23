@@ -6,3 +6,7 @@ export default function handler(req, res) {
     ok: true,
 
     message: "TALK API virker"
+      
+});
+
+}
